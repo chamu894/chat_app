@@ -39,6 +39,11 @@ export default function App() {
 
   const logoPath = require("./assets/images/main.jpeg");
 
+  const [getMobile, setMobile] = useState("");
+  const [getFirstName, setFirstName] = useState("");
+  const [getLastName, setLastName] = useState("");
+  const [getPassword, setPassword] = useState("");
+
   return (
     <LinearGradient colors={["#fff", "#fff"]} style={stylesheet.view1}>
       <ScrollView style={stylesheet.scrollview1}>
@@ -71,22 +76,67 @@ export default function App() {
           </Pressable>
 
           <Text style={stylesheet.text3}>Mobile</Text>
-          <TextInput style={stylesheet.input1} inputMode={"tel"} />
+          <TextInput
+            style={stylesheet.input1}
+            inputMode={"tel"}
+            onChangeText={(text) => {
+              setMobile(text);
+            }}
+          />
 
           <Text style={stylesheet.text3}>First Name</Text>
-          <TextInput style={stylesheet.input1} inputMode={"text"} />
+          <TextInput
+            style={stylesheet.input1}
+            inputMode={"text"}
+            onChangeText={(text) => {
+              setFirstName(text);
+            }}
+          />
 
           <Text style={stylesheet.text3}>Last Name</Text>
-          <TextInput style={stylesheet.input1} inputMode={"text"} />
+          <TextInput
+            style={stylesheet.input1}
+            inputMode={"text"}
+            onChangeText={(text) => {
+              setLastName(text);
+            }}
+          />
 
           <Text style={stylesheet.text3}>Password</Text>
           <TextInput
             style={stylesheet.input1}
             secureTextEntry={true}
             inputMode={"text"}
+            onChangeText={(text) => {
+              setPassword(text);
+            }}
           />
 
-          <Pressable style={stylesheet.Pressable1}>
+          <Pressable
+            style={stylesheet.Pressable1}
+            onPress={async () => {
+              let response = await fetch(
+                " https://7ef7-2402-4000-21c0-328c-cd8f-d5c6-99d4-b764.ngrok-free.app/chat_app_backend/SignUp",
+                {
+                  method: "POST",
+                  body: JSON.stringify({
+                    mobile: getMobile,
+                    firstName: getFirstName,
+                    lastName: getLastName,
+                    password: getPassword,
+                  }),
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                }
+              );
+
+              if (response.ok) {
+                let json = await response.json();
+                Alert.alert("Response", json.message);
+              }
+            }}
+          >
             <FontAwesome6 name={"right-to-bracket"} color={"white"} size={20} />
             <Text style={stylesheet.text4}>Sign Up</Text>
           </Pressable>
