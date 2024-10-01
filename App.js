@@ -8,6 +8,7 @@ import {
   Pressable,
   Alert,
   Button,
+  ScrollView,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -39,57 +40,69 @@ export default function App() {
   const logoPath = require("./assets/images/main.jpeg");
 
   return (
-    <LinearGradient colors={["#4c669f", "#3b5998"]} style={stylesheet.view1}>
-      <Button
-        title="Select Image"
-        onPress={async () => {
-          let result = await ImagePicker.launchImageLibraryAsync(
-            {
+    <LinearGradient colors={["#fff", "#fff"]} style={stylesheet.view1}>
+      <ScrollView style={stylesheet.scrollview1}>
+        <View style={stylesheet.view2}>
+          <Image
+            style={stylesheet.image1}
+            source={logoPath}
+            contentFit="contain"
+          />
 
-            }
-          );
+          <Text style={stylesheet.text1}>Create Account</Text>
 
-          if (!result.canceled) {
-            setImage(result.assets[0].uri);
-          }
-        }}
-      />
+          <Text style={stylesheet.text2}>Hello! Welcome to Smart Chat</Text>
 
-      <Image style={stylesheet.image1} source={getImage} contentFit="contain" />
+          <Pressable
+            onPress={async () => {
+              let result = await ImagePicker.launchImageLibraryAsync({});
 
-      <Text style={stylesheet.text1}>Create Account</Text>
+              if (!result.canceled) {
+                setImage(result.assets[0].uri);
+              }
+            }}
+            style={stylesheet.avatar1}
+          >
+            <Image
+              style={stylesheet.avatar1}
+              source={getImage}
+              contentFit="contain"
+            />
+          </Pressable>
 
-      <Text style={stylesheet.text2}>Hello! Welcome to Smart Chat</Text>
+          <Text style={stylesheet.text3}>Mobile</Text>
+          <TextInput style={stylesheet.input1} inputMode={"tel"} />
 
-      <Text style={stylesheet.text3}>Mobile</Text>
-      <TextInput style={stylesheet.input1} inputMode={"tel"} />
+          <Text style={stylesheet.text3}>First Name</Text>
+          <TextInput style={stylesheet.input1} inputMode={"text"} />
 
-      <Text style={stylesheet.text3}>First Name</Text>
-      <TextInput style={stylesheet.input1} inputMode={"text"} />
+          <Text style={stylesheet.text3}>Last Name</Text>
+          <TextInput style={stylesheet.input1} inputMode={"text"} />
 
-      <Text style={stylesheet.text3}>Last Name</Text>
-      <TextInput style={stylesheet.input1} inputMode={"text"} />
+          <Text style={stylesheet.text3}>Password</Text>
+          <TextInput
+            style={stylesheet.input1}
+            secureTextEntry={true}
+            inputMode={"text"}
+          />
 
-      <Text style={stylesheet.text3}>Password</Text>
-      <TextInput
-        style={stylesheet.input1}
-        secureTextEntry={true}
-        inputMode={"text"}
-      />
+          <Pressable style={stylesheet.Pressable1}>
+            <FontAwesome6 name={"right-to-bracket"} color={"white"} size={20} />
+            <Text style={stylesheet.text4}>Sign Up</Text>
+          </Pressable>
 
-      <Pressable style={stylesheet.Pressable1}>
-        <FontAwesome6 name={"right-to-bracket"} color={"white"} size={20} />
-        <Text style={stylesheet.text4}>Sign Up</Text>
-      </Pressable>
-
-      <Pressable
-        style={stylesheet.Pressable2}
-        onPress={() => {
-          Alert.alert("Message", "Go To Sign In");
-        }}
-      >
-        <Text style={stylesheet.text5}>Already Registered? Go To Sign In</Text>
-      </Pressable>
+          <Pressable
+            style={stylesheet.Pressable2}
+            onPress={() => {
+              Alert.alert("Message", "Go To Sign In");
+            }}
+          >
+            <Text style={stylesheet.text5}>
+              Already Registered? Go To Sign In
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -98,8 +111,7 @@ const stylesheet = StyleSheet.create({
   view1: {
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: 20,
-    rowGap: 10,
+    marginTop: 50,
   },
 
   text1: {
@@ -124,6 +136,7 @@ const stylesheet = StyleSheet.create({
     width: 100,
     height: 100,
     alignSelf: "center",
+    // borderRadius:100,
   },
 
   input1: {
@@ -163,5 +176,21 @@ const stylesheet = StyleSheet.create({
   text5: {
     fontSize: 15,
     fontFamily: "Montserrat-Bold",
+  },
+
+  avatar1: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: "#D1D1D1",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginTop: 20,
+  },
+
+  view2: {
+    flex: 1,
+    paddingHorizontal: 18,
+    rowGap: 5,
   },
 });
