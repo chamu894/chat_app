@@ -7,10 +7,9 @@ import {
   TextInput,
   Pressable,
   Alert,
-  Button,
   ScrollView,
 } from "react-native";
-import { useEffect, useState } from "react";
+import { useState,useEffect } from "react";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
@@ -20,6 +19,10 @@ SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const [getImage, setImage] = useState(null);
+  const [getMobile, setMobile] = useState("");
+  const [getFirstName, setFirstName] = useState("");
+  const [getLastName, setLastName] = useState("");
+  const [getPassword, setPassword] = useState("");
 
   const [loaded, error] = useFonts({
     "Montserrat-Bold": require("./assets/fonts/Montserrat-Bold.ttf"),
@@ -27,7 +30,8 @@ export default function App() {
     "Montserrat-Regular": require("./assets/fonts/Montserrat-Regular.ttf"),
   });
 
-  useEffect(() => {
+  useEffect(
+    () => {
     if (loaded || error) {
       SplashScreen.hideAsync();
     }
@@ -38,11 +42,6 @@ export default function App() {
   }
 
   const logoPath = require("./assets/images/main.jpeg");
-
-  const [getMobile, setMobile] = useState("");
-  const [getFirstName, setFirstName] = useState("");
-  const [getLastName, setLastName] = useState("");
-  const [getPassword, setPassword] = useState("");
 
   return (
     <LinearGradient colors={["#fff", "#fff"]} style={stylesheet.view1}>
@@ -79,7 +78,8 @@ export default function App() {
           <TextInput
             style={stylesheet.input1}
             inputMode={"tel"}
-            onChangeText={(text) => {
+            onChangeText={
+              (text) => {
               setMobile(text);
             }}
           />
@@ -88,7 +88,8 @@ export default function App() {
           <TextInput
             style={stylesheet.input1}
             inputMode={"text"}
-            onChangeText={(text) => {
+            onChangeText={
+              (text) => {
               setFirstName(text);
             }}
           />
@@ -97,7 +98,8 @@ export default function App() {
           <TextInput
             style={stylesheet.input1}
             inputMode={"text"}
-            onChangeText={(text) => {
+            onChangeText={
+              (text) => {
               setLastName(text);
             }}
           />
@@ -107,7 +109,8 @@ export default function App() {
             style={stylesheet.input1}
             secureTextEntry={true}
             inputMode={"text"}
-            onChangeText={(text) => {
+            onChangeText={
+              (text) => {
               setPassword(text);
             }}
           />
@@ -116,7 +119,7 @@ export default function App() {
             style={stylesheet.Pressable1}
             onPress={async () => {
               let response = await fetch(
-                " https://7ef7-2402-4000-21c0-328c-cd8f-d5c6-99d4-b764.ngrok-free.app/chat_app_backend/SignUp",
+                "https://3fba-2402-4000-21c4-43e8-c960-b708-e572-5f01.ngrok-free.app/chat_app_backend/SignUp",
                 {
                   method: "POST",
                   body: JSON.stringify({
