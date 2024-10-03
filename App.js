@@ -124,10 +124,13 @@ export default function App() {
               formData.append("firstName",getFirstName);
               formData.append("lastName",getLastName);
               formData.append("password",getPassword);
-              formData.append("avatarImage",{name:"avatar.png",type:"image/png",uri:getImage});
+
+              if(getImage !=null){
+                formData.append("avatarImage",{name:"avatar.png",type:"image/png",uri:getImage});
+              }
 
               let response = await fetch(
-                "https://3fba-2402-4000-21c4-43e8-c960-b708-e572-5f01.ngrok-free.app/chat_app_backend/SignUp",
+                "https://5012-2402-4000-21c3-18c3-15e9-8817-b650-4ce3.ngrok-free.app/chat_app_backend/SignUp",
                 {
                   method: "POST",
                   body: formData,
@@ -136,7 +139,13 @@ export default function App() {
 
               if (response.ok) {
                 let json = await response.json();
-                Alert.alert("Response", json.message);
+                
+                if(json.success){
+                  Alert.alert("Success", json.message);
+                }else{
+                  Alert.alert("Error", json.message);
+                }
+
               }
             }}
           >
