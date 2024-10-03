@@ -14,10 +14,11 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
+import { registerRootComponent } from "expo";
 
 SplashScreen.preventAutoHideAsync();
 
-export default function App() {
+function SignIn() {
   const [getImage, setImage] = useState(null);
   const [getMobile, setMobile] = useState("");
   const [getFirstName, setFirstName] = useState("");
@@ -84,25 +85,7 @@ export default function App() {
             }}
           />
 
-          <Text style={stylesheet.text3}>First Name</Text>
-          <TextInput
-            style={stylesheet.input1}
-            inputMode={"text"}
-            onChangeText={
-              (text) => {
-              setFirstName(text);
-            }}
-          />
-
-          <Text style={stylesheet.text3}>Last Name</Text>
-          <TextInput
-            style={stylesheet.input1}
-            inputMode={"text"}
-            onChangeText={
-              (text) => {
-              setLastName(text);
-            }}
-          />
+          
 
           <Text style={stylesheet.text3}>Password</Text>
           <TextInput
@@ -168,6 +151,8 @@ export default function App() {
     </LinearGradient>
   );
 }
+
+registerRootComponent(SignIn);
 
 const stylesheet = StyleSheet.create({
   view1: {

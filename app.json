@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "app3",
-    "slug": "app3",
+    "name": "Chat App",
+    "slug": "Chat App",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
