@@ -19,9 +19,9 @@ import { registerRootComponent } from "expo";
 SplashScreen.preventAutoHideAsync();
 
 function SignIn() {
-  const [getImage, setImage] = useState(null);
   const [getMobile, setMobile] = useState("");
   const [getPassword, setPassword] = useState("");
+  const [getName, setName] = useState("");
 
   const [loaded, error] = useFonts({
     "Montserrat-Bold": require("./assets/fonts/Montserrat-Bold.ttf"),
@@ -56,7 +56,7 @@ function SignIn() {
           <Text style={stylesheet.text2}>Hello! Welcome to Smart Chat</Text>
 
           <View style={stylesheet.avatar1}>
-            <Text style={stylesheet.text6}>CB</Text>
+            <Text style={stylesheet.text6}>{getName}</Text>
           </View>
 
           <Text style={stylesheet.text3}>Mobile</Text>
@@ -65,6 +65,19 @@ function SignIn() {
             inputMode={"tel"}
             onChangeText={(text) => {
               setMobile(text);
+            }}
+            onEndEditing={async () => {
+              if (getMobile.length == 10) {
+                let response = await fetch(
+                  "https://6c09-2402-4000-20c2-f6ad-584-f658-e0fe-9b37.ngrok-free.app/chat_app_backend/GetLetters?mobile=" +
+                    getMobile
+                );
+
+                if (response.ok) {
+                  let json = await response.json();
+                  setName(json.letters);
+                }
+              }
             }}
           />
 
@@ -82,7 +95,7 @@ function SignIn() {
             style={stylesheet.Pressable1}
             onPress={async () => {
               let response = await fetch(
-                "https://615b-2402-4000-21c0-2969-9437-c73b-3683-e938.ngrok-free.app/chat_app_backend/SignIn",
+                "https://6c09-2402-4000-20c2-f6ad-584-f658-e0fe-9b37.ngrok-free.app/chat_app_backend/SignIn",
                 {
                   method: "POST",
                   body: JSON.stringify({
