@@ -15,6 +15,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { registerRootComponent } from "expo";
+import { AsyncStorage } from "@react-native-async-storage/async-storage";
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -117,6 +119,13 @@ function SignIn() {
                     "Success",
                     "Hi " + user.frist_name + ", " + json.message
                   );
+
+                  try {
+                    await AsyncStorage.setItem('user', JSON.stringify(user));
+                  } catch (e) {
+                    // saving error
+                  }
+
                 } else {
                   Alert.alert("Error", json.message);
                 }
