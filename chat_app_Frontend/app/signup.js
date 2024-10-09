@@ -9,29 +9,31 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
-import { useState, useEffect } from "react";
+import { StatusBar } from 'expo-status-bar';
+import { useState,useEffect } from "react";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { registerRootComponent } from "expo";
-import { AsyncStorage } from "@react-native-async-storage/async-storage";
-
+import { router } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
 
-function SignIn() {
+export default function signup() {
+  const [getImage, setImage] = useState(null);
   const [getMobile, setMobile] = useState("");
+  const [getFirstName, setFirstName] = useState("");
+  const [getLastName, setLastName] = useState("");
   const [getPassword, setPassword] = useState("");
-  const [getName, setName] = useState("");
 
   const [loaded, error] = useFonts({
-    "Montserrat-Bold": require("./assets/fonts/Montserrat-Bold.ttf"),
-    "Montserrat-Light": require("./assets/fonts/Montserrat-Light.ttf"),
-    "Montserrat-Regular": require("./assets/fonts/Montserrat-Regular.ttf"),
+    "Montserrat-Bold": require("../assets/fonts/Montserrat-Bold.ttf"),
+    "Montserrat-Light": require("../assets/fonts/Montserrat-Light.ttf"),
+    "Montserrat-Regular": require("../assets/fonts/Montserrat-Regular.ttf"),
   });
 
-  useEffect(() => {
+  useEffect(
+    () => {
     if (loaded || error) {
       SplashScreen.hideAsync();
     }
@@ -41,10 +43,11 @@ function SignIn() {
     return null;
   }
 
-  const logoPath = require("./assets/images/main.jpeg");
+  const logoPath = require("../assets/images/main.jpeg");
 
   return (
     <LinearGradient colors={["#fff", "#fff"]} style={stylesheet.view1}>
+      <StatusBar hidden={true}/>
       <ScrollView style={stylesheet.scrollview1}>
         <View style={stylesheet.view2}>
           <Image
@@ -53,33 +56,54 @@ function SignIn() {
             contentFit="contain"
           />
 
-          <Text style={stylesheet.text1}>Sign In</Text>
+          <Text style={stylesheet.text1}>Create Account</Text>
 
           <Text style={stylesheet.text2}>Hello! Welcome to Smart Chat</Text>
 
-          <View style={stylesheet.avatar1}>
-            <Text style={stylesheet.text6}>{getName}</Text>
-          </View>
+          <Pressable
+            onPress={async () => {
+              let result = await ImagePicker.launchImageLibraryAsync({});
+
+              if (!result.canceled) {
+                setImage(result.assets[0].uri);
+              }
+            }}
+            style={stylesheet.avatar1}
+          >
+            <Image
+              style={stylesheet.avatar1}
+              source={getImage}
+              contentFit="contain"
+            />
+          </Pressable>
 
           <Text style={stylesheet.text3}>Mobile</Text>
           <TextInput
             style={stylesheet.input1}
             inputMode={"tel"}
-            onChangeText={(text) => {
+            onChangeText={
+              (text) => {
               setMobile(text);
             }}
-            onEndEditing={async () => {
-              if (getMobile.length == 10) {
-                let response = await fetch(
-                  "https://ee6f-2402-4000-20c2-f6ad-2949-d2ad-3704-6898.ngrok-free.app/chat_app_backend/GetLetters?mobile=" +
-                    getMobile
-                );
+          />
 
-                if (response.ok) {
-                  let json = await response.json();
-                  setName(json.letters);
-                }
-              }
+          <Text style={stylesheet.text3}>First Name</Text>
+          <TextInput
+            style={stylesheet.input1}
+            inputMode={"text"}
+            onChangeText={
+              (text) => {
+              setFirstName(text);
+            }}
+          />
+
+          <Text style={stylesheet.text3}>Last Name</Text>
+          <TextInput
+            style={stylesheet.input1}
+            inputMode={"text"}
+            onChangeText={
+              (text) => {
+              setLastName(text);
             }}
           />
 
@@ -88,7 +112,8 @@ function SignIn() {
             style={stylesheet.input1}
             secureTextEntry={true}
             inputMode={"text"}
-            onChangeText={(text) => {
+            onChangeText={
+              (text) => {
               setPassword(text);
             }}
           />
@@ -96,61 +121,56 @@ function SignIn() {
           <Pressable
             style={stylesheet.Pressable1}
             onPress={async () => {
+
+              let formData = new FormData();
+              formData.append("mobile",getMobile);
+              formData.append("firstName",getFirstName);
+              formData.append("lastName",getLastName);
+              formData.append("password",getPassword);
+
+              if(getImage !=null){
+                formData.append("avatarImage",{name:"avatar.png",type:"image/png",uri:getImage});
+              }
+
               let response = await fetch(
-                "https://ee6f-2402-4000-20c2-f6ad-2949-d2ad-3704-6898.ngrok-free.app/chat_app_backend/SignIn",
+                "https://ee6f-2402-4000-20c2-f6ad-2949-d2ad-3704-6898.ngrok-free.app/chat_app_backend/SignUp",
                 {
                   method: "POST",
-                  body: JSON.stringify({
-                    mobile: getMobile,
-                    password: getPassword,
-                  }),
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
+                  body: formData,
                 }
               );
 
               if (response.ok) {
                 let json = await response.json();
-
-                if (json.success) {
-                  let user = json.user;
-                  Alert.alert(
-                    "Success",
-                    "Hi " + user.frist_name + ", " + json.message
-                  );
-
-                  try {
-                    await AsyncStorage.setItem('user', JSON.stringify(user));
-                  } catch (e) {
-                    // saving error
-                  }
-
-                } else {
+                
+                if(json.success){
+                  router.replace("/");
+                }else{
                   Alert.alert("Error", json.message);
                 }
+
               }
             }}
           >
             <FontAwesome6 name={"right-to-bracket"} color={"white"} size={20} />
-            <Text style={stylesheet.text4}>Sign In</Text>
+            <Text style={stylesheet.text4}>Sign Up</Text>
           </Pressable>
 
           <Pressable
             style={stylesheet.Pressable2}
             onPress={() => {
-              Alert.alert("Message", "Go To Sign Up");
+              router.replace("/");
             }}
           >
-            <Text style={stylesheet.text5}>New User? Go To Sign Up</Text>
+            <Text style={stylesheet.text5}>
+              Already Registered? Go To Sign In
+            </Text>
           </Pressable>
         </View>
       </ScrollView>
     </LinearGradient>
   );
 }
-
-registerRootComponent(SignIn);
 
 const stylesheet = StyleSheet.create({
   view1: {
@@ -236,12 +256,5 @@ const stylesheet = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 18,
     rowGap: 5,
-  },
-
-  text6: {
-    fontSize: 50,
-    fontFamily: "Montserrat-Bold",
-    color: "blue",
-    alignSelf: "center",
   },
 });

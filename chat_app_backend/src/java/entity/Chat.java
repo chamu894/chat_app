@@ -1,6 +1,7 @@
 package entity;
 
 import java.io.Serializable;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -31,7 +32,7 @@ public class Chat implements Serializable{
     private String message;
     
     @Column(name = "date_time", nullable = false)
-    private String date_time;
+    private Date date_time;
     
     @ManyToOne
     @JoinColumn(name = "chat_status_id")
@@ -73,13 +74,7 @@ public class Chat implements Serializable{
         this.message = message;
     }
 
-    public String getDate_time() {
-        return date_time;
-    }
-
-    public void setDate_time(String date_time) {
-        this.date_time = date_time;
-    }
+   
 
     public Chat_Status getChat_status() {
         return chat_status;
@@ -87,6 +82,14 @@ public class Chat implements Serializable{
 
     public void setChat_status(Chat_Status chat_status) {
         this.chat_status = chat_status;
+    }
+
+    public Date getDate_time() {
+        return date_time;
+    }
+
+    public void setDate_time(Date date_time) {
+        this.date_time = date_time;
     }
     
 }

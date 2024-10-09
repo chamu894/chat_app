@@ -8,11 +8,11 @@ import { FontAwesome6 } from "@expo/vector-icons";
 
 SplashScreen.preventAutoHideAsync();
 
-function Home() {
+export default function home() {
   const [loaded, error] = useFonts({
-    "Montserrat-Bold": require("./assets/fonts/Montserrat-Bold.ttf"),
-    "Montserrat-Light": require("./assets/fonts/Montserrat-Light.ttf"),
-    "Montserrat-Regular": require("./assets/fonts/Montserrat-Regular.ttf"),
+    "Montserrat-Bold": require("../assets/fonts/Montserrat-Bold.ttf"),
+    "Montserrat-Light": require("../assets/fonts/Montserrat-Light.ttf"),
+    "Montserrat-Regular": require("../assets/fonts/Montserrat-Regular.ttf"),
   });
 
   useEffect(() => {
@@ -85,8 +85,6 @@ function Home() {
     </LinearGradient>
   );
 }
-
-registerRootComponent(Home);
 
 const stylesheet = StyleSheet.create({
   view1: {
