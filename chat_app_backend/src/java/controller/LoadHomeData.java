@@ -2,6 +2,7 @@ package controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import entity.Chat;
 import entity.User;
 import entity.User_Status;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import model.HibernateUtil;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 @WebServlet(name = "LoadHomeData", urlPatterns = {"/LoadHomeData"})
@@ -47,13 +49,25 @@ public class LoadHomeData extends HttpServlet {
 
             List<User> otherUserlist = criteria1.list();
 
-            session.beginTransaction().commit();
+            for (User otherUser : otherUserlist) {
+                otherUser.getPassword(null);
+            }
+
+            Criteria criteria2 = session.createCriteria(Chat.class);
+            criteria2.add(
+                    Restrictions.or(
+                            Restrictions.eq("from_user", user),
+                            Restrictions.eq("to_user", user)
+                    )
+            );
+            criteria2.addOrder(Order.desc("id"));
 
             responseJson.addProperty("status", true);
             responseJson.addProperty("message", "Sign In Success");
             responseJson.addProperty("user", gson.toJson(user));
             responseJson.addProperty("otherUserlist", gson.toJson(otherUserlist));
 
+            session.beginTransaction().commit();
             session.close();
 
         } catch (Exception e) {

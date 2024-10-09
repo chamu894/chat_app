@@ -11,8 +11,6 @@
         <mapping class="entity.User"/>
         <mapping class="entity.User_Status"/>
         <mapping class="entity.Chat_Status"/>
-
-        
- 
+        <mapping class="entity.Chat"/>
     </session-factory>
 </hibernate-configuration>
