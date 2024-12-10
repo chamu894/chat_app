@@ -88,7 +88,7 @@ export default function index() {
             onEndEditing={async () => {
               if (getMobile.length == 10) {
                 let response = await fetch(
-                  "https://a035-2402-4000-2340-8dd5-58ee-e94a-f3e6-2da8.ngrok-free.app/chat_app_backend/GetLetters?mobile=" +
+                  "https://00db-2402-4000-2340-8dd5-41b2-1baf-42ea-df7b.ngrok-free.app/chat_app_backend/GetLetters?mobile=" +
                     getMobile
                 );
 
@@ -114,7 +114,7 @@ export default function index() {
             style={stylesheet.Pressable1}
             onPress={async () => {
               let response = await fetch(
-                "https://a035-2402-4000-2340-8dd5-58ee-e94a-f3e6-2da8.ngrok-free.app/chat_app_backend/SignIn",
+                "https://00db-2402-4000-2340-8dd5-41b2-1baf-42ea-df7b.ngrok-free.app/chat_app_backend/SignIn",
                 {
                   method: "POST",
                   body: JSON.stringify({

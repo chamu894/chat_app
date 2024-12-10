@@ -5,8 +5,10 @@ import com.google.gson.JsonObject;
 import entity.Chat;
 import entity.User;
 import entity.User_Status;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,6 +19,7 @@ import model.HibernateUtil;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 @WebServlet(name = "LoadHomeData", urlPatterns = {"/LoadHomeData"})
@@ -50,17 +53,50 @@ public class LoadHomeData extends HttpServlet {
             List<User> otherUserlist = criteria1.list();
 
             for (User otherUser : otherUserlist) {
+
+                Criteria criteria2 = session.createCriteria(Chat.class);
+                criteria2.add(
+                        Restrictions.or(
+                                Restrictions.and(
+                                        Restrictions.eq("from_user", user),
+                                        Restrictions.eq("to_user", otherUser)
+                                ),
+                                Restrictions.and(
+                                        Restrictions.eq("from_user", otherUser),
+                                        Restrictions.eq("to_user", user)
+                                )
+                        )
+                );
+                criteria2.addOrder(Order.desc("id"));
+                criteria2.setMaxResults(1);
+
+                JsonObject chatItem = new JsonObject();
+                chatItem.addProperty("other_user_id", otherUser.getFrist_name() + "" + otherUser.getLast_name());
+                chatItem.addProperty("other_user_name", otherUser.getFrist_name() + "" + otherUser.getLast_name());
+                chatItem.addProperty("other_user_status", otherUser.getUser_status().getId());
+                
+                String serverPath = request.getServletContext().getRealPath("");
+                String otherUserAvaterImagePath = serverPath+File.separator+"AvatarImages"+File.separator+otherUser.getMobile()+".png";
+
+                List<Chat> dbChatList = criteria2.list();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy, MMM dd hh:ss a");
+
+                if (dbChatList.isEmpty()) {
+                    chatItem.addProperty("message", "Let's start new conversation");
+                    chatItem.addProperty("dateTime", dateFormat.format(user.getRegistered_date_time()));
+                    chatItem.addProperty("chat_status_id", 1);
+
+                } else {
+
+                    chatItem.addProperty("message", dbChatList.get(0).getMessage());
+
+                    chatItem.addProperty("dateTime", dateFormat.format(dbChatList.get(0).getDate_time()));
+
+                    chatItem.addProperty("chat_status_id", dbChatList.get(0).getChat_status().getId());
+                }
+
                 otherUser.getPassword(null);
             }
-
-            Criteria criteria2 = session.createCriteria(Chat.class);
-            criteria2.add(
-                    Restrictions.or(
-                            Restrictions.eq("from_user", user),
-                            Restrictions.eq("to_user", user)
-                    )
-            );
-            criteria2.addOrder(Order.desc("id"));
 
             responseJson.addProperty("status", true);
             responseJson.addProperty("message", "Sign In Success");
