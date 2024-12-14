@@ -133,7 +133,7 @@ export default function signup() {
               }
 
               let response = await fetch(
-                "https://a51c-95-164-35-90.ngrok-free.app/chat_app_backend/SignUp",
+                "https://697c-107-152-33-11.ngrok-free.app/chat_app_backend/SignUp",
                 {
                   method: "POST",
                   body: formData,
