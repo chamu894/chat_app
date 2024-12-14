@@ -59,6 +59,8 @@ export default function index() {
 
   const logoPath = require("../assets/images/main.jpeg");
 
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   return (
     <LinearGradient colors={["#fff", "#fff"]} style={stylesheet.view1}>
       <StatusBar hidden={true} />
@@ -88,8 +90,8 @@ export default function index() {
             onEndEditing={async () => {
               if (getMobile.length == 10) {
                 let response = await fetch(
-                  "https://697c-107-152-33-11.ngrok-free.app/chat_app_backend/GetLetters?mobile=" +
-                    getMobile
+                  `${apiUrl}GetLetters?mobile=" +
+                  getMobile`
                 );
 
                 if (response.ok) {
@@ -114,7 +116,8 @@ export default function index() {
             style={stylesheet.Pressable1}
             onPress={async () => {
               let response = await fetch(
-                "https://697c-107-152-33-11.ngrok-free.app/chat_app_backend/SignIn",
+                `${apiUrl}chat_app_backend/SignIn`,
+
                 {
                   method: "POST",
                   body: JSON.stringify({
@@ -126,7 +129,7 @@ export default function index() {
                   },
                 }
               );
-
+              
               if (response.ok) {
                 let json = await response.json();
 
