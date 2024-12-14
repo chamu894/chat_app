@@ -20,29 +20,24 @@ public class GetLetters extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        String mobile = request.getParameter("mobile");
-
         Gson gson = new Gson();
         JsonObject responseJson = new JsonObject();
         responseJson.addProperty("letters", "");
 
-        Session session = HibernateUtil.getSessionFactory().openSession();
-
-        Criteria criteria1 = session.createCriteria(User.class);
-        criteria1.add(Restrictions.eq("mobile", mobile));
-
-        if (!criteria1.list().isEmpty()) {
-            //user found
-
-            User user = (User) criteria1.uniqueResult();
-            String letters = user.getFrist_name().charAt(0) + "" + user.getLast_name().charAt(0);
-            responseJson.addProperty("letters", letters);
-
+        if (request.getParameter("mobile") != null) {
+            String mobile = request.getParameter("mobile");
+            if (!mobile.isEmpty()) {
+                Session session = HibernateUtil.getSessionFactory().openSession();
+                User user = (User) session.createCriteria(User.class).add(Restrictions.eq("mobile", mobile)).uniqueResult();
+                if (user != null) {
+                    responseJson.addProperty("letters", user.getFrist_name().charAt(0) + "" + user.getLast_name().charAt(0));
+                }
+                session.close();
+            }
         }
 
         response.setContentType("application/json");
         response.getWriter().write(gson.toJson(responseJson));
-
     }
 
 }

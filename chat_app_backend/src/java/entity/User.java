@@ -40,6 +40,7 @@ public class User implements Serializable {
     private User_Status user_status;
 
     public User() {
+        
     }
 
     public int getId() {
@@ -96,10 +97,6 @@ public class User implements Serializable {
 
     public void setUser_status(User_Status user_status) {
         this.user_status = user_status;
-    }
-
-    public void getPassword(Object object) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     

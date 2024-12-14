@@ -90,8 +90,7 @@ export default function index() {
             onEndEditing={async () => {
               if (getMobile.length == 10) {
                 let response = await fetch(
-                  `${apiUrl}GetLetters?mobile=" +
-                  getMobile`
+                  `${apiUrl}GetLetters?mobile=${getMobile}`
                 );
 
                 if (response.ok) {
@@ -117,7 +116,6 @@ export default function index() {
             onPress={async () => {
               let response = await fetch(
                 `${apiUrl}chat_app_backend/SignIn`,
-
                 {
                   method: "POST",
                   body: JSON.stringify({
