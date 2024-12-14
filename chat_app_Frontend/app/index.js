@@ -88,7 +88,7 @@ export default function index() {
             onEndEditing={async () => {
               if (getMobile.length == 10) {
                 let response = await fetch(
-                  "https://0bab-95-164-35-90.ngrok-free.app/chat_app_backend/GetLetters?mobile=" +
+                  "https://a51c-95-164-35-90.ngrok-free.app/chat_app_backend/GetLetters?mobile=" +
                     getMobile
                 );
 
@@ -114,7 +114,7 @@ export default function index() {
             style={stylesheet.Pressable1}
             onPress={async () => {
               let response = await fetch(
-                "https://0c5e-95-164-35-90.ngrok-free.app/chat_app_backend/SignIn",
+                "https://a51c-95-164-35-90.ngrok-free.app/chat_app_backend/SignIn",
                 {
                   method: "POST",
                   body: JSON.stringify({
