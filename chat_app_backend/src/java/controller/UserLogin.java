@@ -1,9 +1,11 @@
+
 package controller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import entity.User;
 import java.io.IOException;
+import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,10 +17,14 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 
-@WebServlet(name = "SignIn", urlPatterns = {"/SignIn"})
-public class SignIn extends HttpServlet {
+/**
+ *
+ * @author chamu
+ */
+@WebServlet(name = "UserLogin", urlPatterns = {"/UserLogin"})
+public class UserLogin extends HttpServlet {
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         Gson gson = new Gson();
         JsonObject responseJson = new JsonObject();

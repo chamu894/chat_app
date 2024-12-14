@@ -95,7 +95,7 @@ public class LoadHomeData extends HttpServlet {
                     chatItem.addProperty("chat_status_id", dbChatList.get(0).getChat_status().getId());
                 }
 
-                otherUser.getPassword(null);
+                otherUser.setPassword(null);
             }
 
             responseJson.addProperty("status", true);
