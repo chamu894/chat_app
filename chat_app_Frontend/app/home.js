@@ -1,14 +1,14 @@
-import { registerRootComponent } from "expo";
 import { LinearGradient } from "expo-linear-gradient";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { useState, useEffect } from "react";
-import { FontAwesome6 } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 SplashScreen.preventAutoHideAsync();
 
-export default function home() {
+export default function Home() {
   const [loaded, error] = useFonts({
     "Montserrat-Bold": require("../assets/fonts/Montserrat-Bold.ttf"),
     "Montserrat-Light": require("../assets/fonts/Montserrat-Light.ttf"),
@@ -26,142 +26,118 @@ export default function home() {
   }
 
   return (
-    <LinearGradient colors={["#C5CACF", "#C5CACF"]} style={stylesheet.view1}>
-      <View style={stylesheet.view2}>
-        <View style={stylesheet.view3}></View>
-
-        <View style={stylesheet.view4}>
-          <Text style={stylesheet.text1}>Chamudith Bandara</Text>
-          <Text style={stylesheet.text2}>0764733894</Text>
-          <Text style={stylesheet.text3}>Since, 10/07/2024</Text>
-        </View>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Chats</Text>
+        <Pressable style={styles.iconButton}>
+          <Ionicons name="search" size={24} color="white" />
+        </Pressable>
+        <Pressable style={styles.iconButton}>
+          <Ionicons name="ellipsis-vertical" size={24} color="white" />
+        </Pressable>
       </View>
 
-      <ScrollView style={stylesheet.scrollview1}>
-
-        <View style={stylesheet.view5}>
-          <View style={stylesheet.view6}></View>
-
-          <View style={stylesheet.view4}>
-            <Text style={stylesheet.text1}>Kavii Ekanayake</Text>
-            <Text style={stylesheet.text4} numberOfLines={1}>Hello! Kavii...</Text>
-
-            <View style={stylesheet.view7}>
-              <Text style={stylesheet.text5}>10/07/2024 08:50.am</Text>
-              <FontAwesome6 name={"check"} color={"white"} size={20} />
+      {/* Chats List */}
+      <ScrollView style={styles.chatList}>
+        {Array(10).fill(0).map((_, index) => (
+          <View style={styles.chatItem} key={index}>
+            <View style={styles.avatar}>
+              <FontAwesome name="user-circle" size={50} color="gray" />
+            </View>
+            <View style={styles.chatDetails}>
+              <Text style={styles.chatName}>Contact {index + 1}</Text>
+              <Text style={styles.chatMessage} numberOfLines={1}>
+                Last message preview goes here...
+              </Text>
+            </View>
+            <View style={styles.chatMeta}>
+              <Text style={styles.chatTime}>10:00 AM</Text>
+              <Ionicons name="checkmark-done" size={16} color="green" />
             </View>
           </View>
-        </View>
-
-        <View style={stylesheet.view5}>
-          <View style={stylesheet.view6}></View>
-
-          <View style={stylesheet.view4}>
-            <Text style={stylesheet.text1}>Kumudi Bandara</Text>
-            <Text style={stylesheet.text4} numberOfLines={1}>Hello! Kumudi...</Text>
-
-            <View style={stylesheet.view7}>
-              <Text style={stylesheet.text5}>10/07/2024 08:50.am</Text>
-              <FontAwesome6 name={"check"} color={"white"} size={20} />
-            </View>
-          </View>
-        </View>
-
-        <View style={stylesheet.view5}>
-          <View style={stylesheet.view6}></View>
-
-          <View style={stylesheet.view4}>
-            <Text style={stylesheet.text1}>Oshadi Bandara</Text>
-            <Text style={stylesheet.text4} numberOfLines={1}>Hello! Oshadi...</Text>
-
-            <View style={stylesheet.view7}>
-              <Text style={stylesheet.text5}>10/07/2024 08:50.am</Text>
-              <FontAwesome6 name={"check"} color={"green"} size={20} />
-            </View>
-          </View>
-        </View>
-
+        ))}
       </ScrollView>
-    </LinearGradient>
+
+      {/* Floating Action Button */}
+      <Pressable style={styles.fab}>
+        <Ionicons name="chatbubble" size={28} color="white" />
+      </Pressable>
+    </View>
   );
 }
 
-const stylesheet = StyleSheet.create({
-  view1: {
+const styles = StyleSheet.create({
+  container: {
     flex: 1,
-    paddingVertical: 50,
-    paddingHorizontal: 20,
+    backgroundColor: "#edf0f5",
   },
-
-  view2: {
+  header: {
+    height: 70,
+    backgroundColor: "#202121",
     flexDirection: "row",
-    columnGap: 20,
     alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 15,
   },
-
-  view3: {
-    width: 80,
-    height: 80,
-    backgroundColor: "white",
-    borderRadius: 40,
+  headerText: {
+    fontSize: 20,
+    color: "white",
+    fontFamily: "Montserrat-Bold",
   },
-
-  view4: {
+  iconButton: {
+    padding: 10,
+  },
+  chatList: {
+    flex: 1,
+    paddingHorizontal: 15,
+    paddingTop: 10,
+  },
+  chatItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#edf0f5",
+    marginRight: 15,
+  },
+  chatDetails: {
     flex: 1,
   },
-
-  text1: {
-    fontFamily: "Montserrat-Bold",
-    fontSize: 22,
-  },
-
-  text2: {
-    fontFamily: "Montserrat-Regular",
+  chatName: {
     fontSize: 18,
+    fontFamily: "Montserrat-Bold",
+    color: "#202121",
   },
-
-  text3: {
-    fontFamily: "Montserrat-Regular",
+  chatMessage: {
     fontSize: 14,
-    alignSelf: "flex-end",
-  },
-
-  view5: {
-    flexDirection: "row",
-    marginVertical: 10,
-    columnGap: 20,
-  },
-
-  view6: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "white",
-    borderStyle: "dotted",
-    borderWidth: 5,
-    borderColor: "blue",
-  },
-
-  text4: {
     fontFamily: "Montserrat-Regular",
-    fontSize: 16,
+    color: "gray",
   },
-
-  text5: {
+  chatMeta: {
+    alignItems: "flex-end",
+  },
+  chatTime: {
+    fontSize: 12,
     fontFamily: "Montserrat-Regular",
-    fontSize: 14,
-    alignSelf: "flex-end",
+    color: "gray",
   },
-
-  scrollview1: {
-    marginTop: 30,
+  fab: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#0547b0",
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 5,
   },
-
-  view7:{
-    flexDirection:"row",
-    columnGap:10,
-    alignSelf:"flex-end",
-    alignItems:"center",
-  },
-
 });
