@@ -45,6 +45,8 @@ export default function signup() {
 
   const logoPath = require("../assets/images/main.jpeg");
 
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   return (
     <LinearGradient colors={["#fff", "#fff"]} style={stylesheet.view1}>
       <StatusBar hidden={true}/>
@@ -133,7 +135,7 @@ export default function signup() {
               }
 
               let response = await fetch(
-                "https://697c-107-152-33-11.ngrok-free.app/chat_app_backend/SignUp",
+                `${apiUrl}SignUp`,
                 {
                   method: "POST",
                   body: formData,
