@@ -5,6 +5,7 @@ import { useFonts } from "expo-font";
 import { useState, useEffect } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { router } from "expo-router";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,7 +34,9 @@ export default function Home() {
         <Pressable style={styles.iconButton}>
           <Ionicons name="search" size={24} color="white" />
         </Pressable>
-        <Pressable style={styles.iconButton}>
+        <Pressable style={styles.iconButton} onPress={async () => {
+            router.replace("/profile");
+          }}>
           <Ionicons name="ellipsis-vertical" size={24} color="white" />
         </Pressable>
       </View>
