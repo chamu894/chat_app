@@ -9,17 +9,21 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 
 export default function sendchat() {
   const [getText, setText] = useState("");
 
   const [getData, setData] = useState([]);
 
+  const { toUser, name, image, fromUser } = useLocalSearchParams();
+
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
-  const [getUser, setUser] = useState({});
-
   async function GetChat() {
+    console.log(fromUser);
+    console.log(toUser);
+
     try {
       let response = await fetch(`${apiUrl}GetChat`, {
         method: "POST",
@@ -27,13 +31,14 @@ export default function sendchat() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          fromUser: getUser.id,
-          toUser: 2,
+          fromUser: fromUser,
+          toUser: toUser,
         }),
       });
 
       if (response.ok) {
         let json = await response.json();
+        console.log(json.chatList);
         if (json.status) {
           if (JSON.stringify(json.chatList) !== JSON.stringify(getData)) {
             setData(json.chatList);
@@ -50,21 +55,8 @@ export default function sendchat() {
   }
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const user = await AsyncStorage.getItem("user");
-        const parsedUser = JSON.parse(user || "{}");
-        if (parsedUser.id !== getUser.id) {
-          setUser(parsedUser);
-          await GetChat();
-        }
-      } catch (error) {
-        console.log("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+    GetChat();
+  }, [fromUser, toUser]);
 
   useFocusEffect(
     useCallback(() => {
@@ -73,7 +65,7 @@ export default function sendchat() {
       }, 5000);
 
       return () => clearInterval(intervalId);
-    }, [getUser])
+    }, [fromUser, toUser])
   );
 
   return (
@@ -91,7 +83,7 @@ export default function sendchat() {
           {/* <Image source={require("../assets/images/main.jpeg")} style={stylesheet.profileImage} /> */}
           <FontAwesome name="user-circle" size={40} color="black" />
         </View>
-        <Text style={stylesheet.text1}>Sahan</Text>
+        <Text style={stylesheet.text1}>{name}</Text>
       </View>
 
       <View style={stylesheet.view1}>
@@ -104,7 +96,7 @@ export default function sendchat() {
           renderItem={({ item }) => (
             <View
               style={
-                item.fromUser === getUser.id
+                parseInt(item.fromUser) === parseInt(fromUser)
                   ? stylesheet.view5
                   : stylesheet.view3
               }
@@ -112,13 +104,14 @@ export default function sendchat() {
               <Text style={stylesheet.text2}>{item.msg}</Text>
               <View style={stylesheet.view4}>
                 <Text style={stylesheet.text3}>{item.time}</Text>
-                {item.fromUser === getUser.id ? (
+                {parseInt(item.fromUser) === parseInt(fromUser) ? (
                   <FontAwesome5
                     name={item.status === 1 ? "check-double" : "check"}
                     size={12}
-                    color={item.status === 1 ? "#34eb8c" : "#fff"}
+                    color={item.status === 1 ? "#34eb8c" : "#fff"} 
                   />
                 ) : null}
+              
               </View>
             </View>
           )}
@@ -148,8 +141,8 @@ export default function sendchat() {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  fromUser: 1,
-                  toUser: 2,
+                  fromUser: fromUser,
+                  toUser: toUser,
                   msg: getText,
                 }),
               });
@@ -231,9 +224,10 @@ const stylesheet = StyleSheet.create({
     borderRadius: 15,
     borderWidth: 2,
     borderColor: "#fff",
+    color:"#fff",
     height: 50,
     paddingHorizontal: 10,
-    fontSize: 18,
+    fontSize: 18, 
   },
   pressable: {
     height: 50,

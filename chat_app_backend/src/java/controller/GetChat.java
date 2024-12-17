@@ -6,7 +6,6 @@ import entity.Chat;
 import entity.Chat_Status;
 import entity.User;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.HibernateUtil;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-
 
 @WebServlet(name = "GetChat", urlPatterns = {"/GetChat"})
 public class GetChat extends HttpServlet {
@@ -55,7 +54,7 @@ public class GetChat extends HttpServlet {
                                             Restrictions.eq("from_user", toUser),
                                             Restrictions.eq("to_user", fromUser)
                                     )
-                            )).list();
+                            )).addOrder(Order.asc("id")).list();
 
                     List<JsonObject> list = new ArrayList<>();
 
@@ -66,6 +65,7 @@ public class GetChat extends HttpServlet {
                         for (Chat chat : chatList) {
 
                             if (chat.getTo_user().equals(fromUser) && !chat.getChat_status().equals(status)) {
+                                chat.setChat_status(status);
                                 session.update(chat);
                                 session.beginTransaction().commit();
                             }

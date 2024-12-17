@@ -22,7 +22,7 @@ SplashScreen.preventAutoHideAsync();
 export default function Home() {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [getUser, setUser] = useState({});
+  const [getUser, setUser] = useState(null); // User data is initially null
   const [getData, setData] = useState([]);
 
   const [loaded, error] = useFonts({
@@ -44,31 +44,27 @@ export default function Home() {
     return null;
   }
 
-  // Fetch user data and update status
+  // Fetch user data from AsyncStorage
   useEffect(() => {
-    async function Cheng() {
+    async function fetchUserData() {
       try {
-        const userObject = JSON.parse(await AsyncStorage.getItem("user"));
-        setUser(userObject);
-
-        const response = await fetch(`${apiUrl}UserStatusCheng?id=1&st=2`);
-        if (response.ok) {
-          const json = await response.json();
-          console.log(json);
-        } else {
-          console.log("Error updating status");
+        const userObject = await AsyncStorage.getItem("user");
+        if (userObject) {
+          const parsedUser = JSON.parse(userObject);
+          setUser(parsedUser);
         }
       } catch (err) {
         console.log("Error fetching user data:", err);
       }
     }
 
-    Cheng();
-    GetData();
+    fetchUserData();
   }, []);
 
-  // Fetch home data
-  async function GetData() {
+  // Fetch home data when the user is available
+  const GetData = useCallback(async () => {
+    if (!getUser) return; // Avoid running if user data is null
+
     try {
       const response = await fetch(`${apiUrl}LoadHomeData`, {
         method: "POST",
@@ -87,7 +83,31 @@ export default function Home() {
     } catch (error) {
       console.log("Fetch Error:", error);
     }
-  }
+  }, [getUser]);
+
+  // Update user status when user data changes
+  useEffect(() => {
+    if (!getUser) return;
+
+    async function updateStatus() {
+      try {
+        const response = await fetch(
+          `${apiUrl}UserStatusCheng?id=${getUser.id}&st=2`
+        );
+        if (response.ok) {
+          const json = await response.json();
+          console.log(json);
+        } else {
+          console.log("Error updating status");
+        }
+      } catch (err) {
+        console.log("Error updating user status:", err);
+      }
+    }
+
+    updateStatus();
+    GetData();
+  }, [getUser, GetData]);
 
   // Periodically fetch data
   useFocusEffect(
@@ -97,7 +117,7 @@ export default function Home() {
       }, 5000);
 
       return () => clearInterval(intervalId);
-    }, [getUser])
+    }, [GetData])
   );
 
   return (
@@ -134,26 +154,45 @@ export default function Home() {
       </View>
 
       <View style={styles.chatList}>
-      <FlashList data={getData}
-          renderItem={({ item }) =>
-            <Pressable style={styles.chatItem} onPress={() => router.replace("/sendchat")}>
+        <FlashList
+          data={getData}
+          renderItem={({ item }) => (
+            <Pressable
+              style={styles.chatItem}
+              onPress={() =>
+                router.push({
+                  pathname: "/sendchat",
+                  params: {
+                    toUser: item.toUser,
+                    name: item.name,
+                    image: item.image,
+                    fromUser: getUser.id,
+                  },
+                })
+              }
+              
+            >
               <View style={styles.avatar}>
                 <FontAwesome name="user-circle" size={50} color="gray" />
               </View>
 
               <View style={styles.chatDetails}>
                 <Text style={styles.chatName}>{item.name}</Text>
-                {
-                  item.lastChat !== null ? <Text style={styles.chatMessage} numberOfLines={1}>
+                {item.lastChat && (
+                  <Text style={styles.chatMessage} numberOfLines={1}>
                     {item.lastChat.msg}
-                  </Text> : null
-                }
+                  </Text>
+                )}
               </View>
-              {
-                item.lastChat !== null ? <View style={styles.chatMeta}>
+
+              {item.lastChat && (
+                <View style={styles.chatMeta}>
                   <Text style={styles.chatTime}>{item.lastChat.time}</Text>
-                </View> : null}
-            </Pressable>}
+                </View>
+              )}
+            </Pressable>
+          )}
+          keyExtractor={(item, index) => `${item.toUser}-${index}`}
           estimatedItemSize={200}
         />
       </View>
@@ -203,7 +242,11 @@ const styles = StyleSheet.create({
   },
   chatDetails: { flex: 1 },
   chatName: { fontSize: 18, fontFamily: "Montserrat-Bold", color: "#202121" },
-  chatMessage: { fontSize: 14, fontFamily: "Montserrat-Regular", color: "gray" },
+  chatMessage: {
+    fontSize: 14,
+    fontFamily: "Montserrat-Regular",
+    color: "gray",
+  },
   chatMeta: { alignItems: "flex-end" },
   chatTime: { fontSize: 12, fontFamily: "Montserrat-Regular", color: "gray" },
   fab: {
