@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { useState, useEffect } from "react";
@@ -16,6 +16,9 @@ export default function Home() {
     "Montserrat-Regular": require("../assets/fonts/Montserrat-Regular.ttf"),
   });
 
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
     if (loaded || error) {
       SplashScreen.hideAsync();
@@ -30,36 +33,55 @@ export default function Home() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>Chats</Text>
-        <Pressable style={styles.iconButton}>
-          <Ionicons name="search" size={24} color="white" />
+        {isSearchActive ? (
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search..."
+            placeholderTextColor="gray"
+            value={searchQuery}
+            onChangeText={(text) => setSearchQuery(text)}
+            autoFocus
+          />
+        ) : (
+          <Text style={styles.headerText}>Chats</Text>
+        )}
+        <Pressable
+          style={styles.iconButton}
+          onPress={() => setIsSearchActive((prev) => !prev)}
+        >
+          <Ionicons name={isSearchActive ? "close" : "search"} size={24} color="white" />
         </Pressable>
-        <Pressable style={styles.iconButton} onPress={async () => {
+        <Pressable
+          style={styles.iconButton}
+          onPress={async () => {
             router.replace("/profile");
-          }}>
+          }}
+        >
           <Ionicons name="ellipsis-vertical" size={24} color="white" />
         </Pressable>
       </View>
 
       {/* Chats List */}
       <ScrollView style={styles.chatList}>
-        {Array(10).fill(0).map((_, index) => (
-          <View style={styles.chatItem} key={index}>
-            <View style={styles.avatar}>
-              <FontAwesome name="user-circle" size={50} color="gray" />
+        {Array(10)
+          .fill(0)
+          .map((_, index) => (
+            <View style={styles.chatItem} key={index}>
+              <View style={styles.avatar}>
+                <FontAwesome name="user-circle" size={50} color="gray" />
+              </View>
+              <View style={styles.chatDetails}>
+                <Text style={styles.chatName}>Contact {index + 1}</Text>
+                <Text style={styles.chatMessage} numberOfLines={1}>
+                  Last message preview goes here...
+                </Text>
+              </View>
+              <View style={styles.chatMeta}>
+                <Text style={styles.chatTime}>10:00 AM</Text>
+                <Ionicons name="checkmark-done" size={16} color="green" />
+              </View>
             </View>
-            <View style={styles.chatDetails}>
-              <Text style={styles.chatName}>Contact {index + 1}</Text>
-              <Text style={styles.chatMessage} numberOfLines={1}>
-                Last message preview goes here...
-              </Text>
-            </View>
-            <View style={styles.chatMeta}>
-              <Text style={styles.chatTime}>10:00 AM</Text>
-              <Ionicons name="checkmark-done" size={16} color="green" />
-            </View>
-          </View>
-        ))}
+          ))}
       </ScrollView>
 
       {/* Floating Action Button */}
@@ -87,6 +109,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "white",
     fontFamily: "Montserrat-Bold",
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: "white",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    fontFamily: "Montserrat-Regular",
+    color: "#202121",
   },
   iconButton: {
     padding: 10,

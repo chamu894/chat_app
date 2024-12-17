@@ -30,12 +30,13 @@ export default function sendchat() {
           toUser: 2,
         }),
       });
-
+  
       if (response.ok) {
         let json = await response.json();
         if (json.status) {
-          console.log(json);
-          setData(json.chatList);
+          if (JSON.stringify(json.chatList) !== JSON.stringify(getData)) {
+            setData(json.chatList);
+          }
         } else {
           console.log("Error 02");
         }
@@ -51,15 +52,18 @@ export default function sendchat() {
     const fetchUserData = async () => {
       try {
         const user = await AsyncStorage.getItem("user");
-        setUser(JSON.parse(user || "{}"));
-        await GetChat();
+        const parsedUser = JSON.parse(user || "{}");
+        if (parsedUser.id !== getUser.id) {
+          setUser(parsedUser);
+          await GetChat();
+        }
       } catch (error) {
         console.log("Error fetching user data:", error);
       }
     };
 
     fetchUserData();
-  }, [getUser, setUser]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -85,6 +89,9 @@ export default function sendchat() {
         <FlashList
           contentContainerStyle={stylesheet.flashlist}
           data={getData}
+          keyExtractor={(item, index) =>
+            item.id?.toString() || index.toString()
+          } // Use item.id if available
           renderItem={({ item }) => (
             <View
               style={
@@ -229,7 +236,6 @@ const stylesheet = StyleSheet.create({
 
   flashlist: {
     padding: 10,
-    height:100,
   },
 
   view3: {
