@@ -42,7 +42,7 @@ export default function ProfileUI() {
           style={styles.optionItem}
           onPress={async () => {
             await AsyncStorage.setItem("user", "");
-            router.replace("/index");
+            router.replace("/");
           }}
         >
           <Ionicons name="log-out" size={24} color="black" />

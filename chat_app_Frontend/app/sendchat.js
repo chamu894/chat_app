@@ -3,12 +3,73 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Image } from "expo-image";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+import { FlashList } from "@shopify/flash-list";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 export default function sendchat() {
   const [getText, setText] = useState("");
 
+  const [getData, setData] = useState([]);
+
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
+  const [getUser, setUser] = useState({});
+
+  async function GetChat() {
+    try {
+      let response = await fetch(`${apiUrl}GetChat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fromUser: getUser.id,
+          toUser: 2,
+        }),
+      });
+
+      if (response.ok) {
+        let json = await response.json();
+        if (json.status) {
+          console.log(json);
+          setData(json.chatList);
+        } else {
+          console.log("Error 02");
+        }
+      } else {
+        console.log("Error 01");
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+    }
+  }
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const user = await AsyncStorage.getItem("user");
+        setUser(JSON.parse(user || "{}"));
+        await GetChat();
+      } catch (error) {
+        console.log("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [getUser, setUser]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const intervalId = setInterval(() => {
+        GetChat();
+      }, 5000);
+
+      return () => clearInterval(intervalId);
+    }, [getUser])
+  );
 
   return (
     <SafeAreaView style={stylesheet.container}>
@@ -21,25 +82,32 @@ export default function sendchat() {
       </View>
 
       <View style={stylesheet.view1}>
-        <View style={stylesheet.view3}>
-          <Text style={stylesheet.text2}>
-            Hello Sahan frgvefrd rerderv erfvcerdfv{" "}
-          </Text>
-          <View style={stylesheet.view4}>
-            <Text style={stylesheet.text3}>2024/12/10 10:00 am</Text>
-            <FontAwesome name="check" size={12} color="#fff" />
-          </View>
-        </View>
-
-        <View style={stylesheet.view5}>
-          <Text style={stylesheet.text2}>
-            Hello Sahan frgvefrd rerderv erfvcerdfv{" "}
-          </Text>
-          <View style={stylesheet.view4}>
-            <Text style={stylesheet.text3}>2024/12/10 10:00 am</Text>
-            <FontAwesome name="check" size={12} color="#fff" />
-          </View>
-        </View>
+        <FlashList
+          contentContainerStyle={stylesheet.flashlist}
+          data={getData}
+          renderItem={({ item }) => (
+            <View
+              style={
+                item.fromUser === getUser.id
+                  ? stylesheet.view5
+                  : stylesheet.view3
+              }
+            >
+              <Text style={stylesheet.text2}>{item.msg}</Text>
+              <View style={stylesheet.view4}>
+                <Text style={stylesheet.text3}>{item.time}</Text>
+                {item.fromUser === getUser.id ? (
+                  <FontAwesome5
+                    name={item.status === 1 ? "check-double" : "check"}
+                    size={12}
+                    color={item.status === 1 ? "#34eb8c" : "#fff"}
+                  />
+                ) : null}
+              </View>
+            </View>
+          )}
+          estimatedItemSize={200}
+        />
       </View>
 
       <View style={stylesheet.view2}>
@@ -159,6 +227,11 @@ const stylesheet = StyleSheet.create({
 
   // chat component
 
+  flashlist: {
+    padding: 10,
+    height:100,
+  },
+
   view3: {
     backgroundColor: "#202121",
     padding: 10,
@@ -168,6 +241,7 @@ const stylesheet = StyleSheet.create({
     borderTopEndRadius: 15,
     borderBottomStartRadius: 15,
     borderBottomEndRadius: 15,
+    marginBottom: 10,
   },
 
   view5: {
@@ -179,6 +253,7 @@ const stylesheet = StyleSheet.create({
     borderTopEndRadius: 15,
     borderTopStartRadius: 15,
     borderBottomStartRadius: 15,
+    marginBottom: 10,
   },
 
   text2: {
