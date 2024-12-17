@@ -9,31 +9,31 @@ import {
 } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
-import { useState, useEffect,useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { router } from "expo-router";
-import { FlashList } from "@shopify/flash-list";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { FlashList } from "@shopify/flash-list";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function Home() {
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [getUser, setUser] = useState({});
+  const [getData, setData] = useState([]);
+
   const [loaded, error] = useFonts({
     "Montserrat-Bold": require("../assets/fonts/Montserrat-Bold.ttf"),
     "Montserrat-Light": require("../assets/fonts/Montserrat-Light.ttf"),
     "Montserrat-Regular": require("../assets/fonts/Montserrat-Regular.ttf"),
   });
 
-  const [isSearchActive, setIsSearchActive] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const [getUser, setUser] = useState({});
-  const [getData, setData] = useEffect([]);
-
   const apiUrl = process.env.EXPO_PUBLIC_API_URL;
 
+  // Hide Splash Screen once fonts are loaded
   useEffect(() => {
     if (loaded || error) {
       SplashScreen.hideAsync();
@@ -44,72 +44,52 @@ export default function Home() {
     return null;
   }
 
-  async function GetData() {
-
-    let response = await fetch(`${apiUrl}LoadHomeData`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: getUser.id,
-      }),
-    });
-
-    if (response.ok) {
-
-      let json = await response.json();
-
-      console.log(json);
-
-      if (json.status) {
-
-        setData(json.content);
-
-      } else {
-        console.log("Error 04");
-      }
-
-
-    } else {
-      console.log("Error 03");
-    }
-
-  }
-
+  // Fetch user data and update status
   useEffect(() => {
-
     async function Cheng() {
+      try {
+        const userObject = JSON.parse(await AsyncStorage.getItem("user"));
+        setUser(userObject);
 
-      let userObject = JSON.stringify(await AsyncStorage.getItem("user"));
-
-      setUser(userObject);
-
-      let response = await fetch(`${apiUrl}UserStatusCheng?id=1&st=2`);
-
-      if (response.ok) {
-
-        let json = await response.json();
-
-        console.log(json);
-
-        if (json.status) {
-          console.log("Cheng ok");
+        const response = await fetch(`${apiUrl}UserStatusCheng?id=1&st=2`);
+        if (response.ok) {
+          const json = await response.json();
+          console.log(json);
         } else {
-          console.log("Error 2");
+          console.log("Error updating status");
         }
-
-      } else {
-        console.log("Error1")
+      } catch (err) {
+        console.log("Error fetching user data:", err);
       }
-
     }
 
     Cheng();
     GetData();
+  }, []);
 
-  }, [getUser]);
+  // Fetch home data
+  async function GetData() {
+    try {
+      const response = await fetch(`${apiUrl}LoadHomeData`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: getUser.id }),
+      });
 
+      if (response.ok) {
+        const json = await response.json();
+        if (json.status) {
+          setData(json.content);
+        } else {
+          console.log("Error fetching home data");
+        }
+      }
+    } catch (error) {
+      console.log("Fetch Error:", error);
+    }
+  }
+
+  // Periodically fetch data
   useFocusEffect(
     useCallback(() => {
       const intervalId = setInterval(() => {
@@ -122,7 +102,6 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         {isSearchActive ? (
           <TextInput
@@ -148,39 +127,37 @@ export default function Home() {
         </Pressable>
         <Pressable
           style={styles.iconButton}
-          onPress={async () => {
-            router.replace("/profile");
-          }}
+          onPress={() => router.replace("/profile")}
         >
           <Ionicons name="ellipsis-vertical" size={24} color="white" />
         </Pressable>
       </View>
 
-      {/* Chats List */}
-      <ScrollView style={styles.chatList}>
-        <View style={styles.chatItem}>
-          <View style={styles.avatar}>
-            <FontAwesome name="user-circle" size={50} color="gray" />
-          </View>
-          <Pressable
-            style={styles.chatDetails}
-            onPress={async () => {
-              router.replace("/sendchat");
-            }}
-          >
-            <Text style={styles.chatName}>Contact </Text>
-            <Text style={styles.chatMessage} numberOfLines={1}>
-              Last message preview goes here...
-            </Text>
-          </Pressable>
-          <View style={styles.chatMeta}>
-            <Text style={styles.chatTime}>10:00 AM</Text>
-            <Ionicons name="checkmark-done" size={16} color="green" />
-          </View>
-        </View>
-      </ScrollView>
+      <View style={styles.chatList}>
+      <FlashList data={getData}
+          renderItem={({ item }) =>
+            <Pressable style={styles.chatItem} onPress={() => router.replace("/sendchat")}>
+              <View style={styles.avatar}>
+                <FontAwesome name="user-circle" size={50} color="gray" />
+              </View>
 
-      {/* Floating Action Button */}
+              <View style={styles.chatDetails}>
+                <Text style={styles.chatName}>{item.name}</Text>
+                {
+                  item.lastChat !== null ? <Text style={styles.chatMessage} numberOfLines={1}>
+                    {item.lastChat.msg}
+                  </Text> : null
+                }
+              </View>
+              {
+                item.lastChat !== null ? <View style={styles.chatMeta}>
+                  <Text style={styles.chatTime}>{item.lastChat.time}</Text>
+                </View> : null}
+            </Pressable>}
+          estimatedItemSize={200}
+        />
+      </View>
+
       <Pressable style={styles.fab}>
         <Ionicons name="chatbubble" size={28} color="white" />
       </Pressable>
@@ -189,10 +166,7 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#edf0f5",
-  },
+  container: { flex: 1, backgroundColor: "#edf0f5" },
   header: {
     height: 70,
     backgroundColor: "#202121",
@@ -201,11 +175,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 15,
   },
-  headerText: {
-    fontSize: 20,
-    color: "white",
-    fontFamily: "Montserrat-Bold",
-  },
+  headerText: { fontSize: 20, color: "white", fontFamily: "Montserrat-Bold" },
   searchInput: {
     flex: 1,
     height: 40,
@@ -215,14 +185,8 @@ const styles = StyleSheet.create({
     fontFamily: "Montserrat-Regular",
     color: "#202121",
   },
-  iconButton: {
-    padding: 10,
-  },
-  chatList: {
-    flex: 1,
-    paddingHorizontal: 15,
-    paddingTop: 10,
-  },
+  iconButton: { padding: 10 },
+  chatList: { flex: 1, paddingHorizontal: 15, paddingTop: 10 },
   chatItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -237,27 +201,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#edf0f5",
     marginRight: 15,
   },
-  chatDetails: {
-    flex: 1,
-  },
-  chatName: {
-    fontSize: 18,
-    fontFamily: "Montserrat-Bold",
-    color: "#202121",
-  },
-  chatMessage: {
-    fontSize: 14,
-    fontFamily: "Montserrat-Regular",
-    color: "gray",
-  },
-  chatMeta: {
-    alignItems: "flex-end",
-  },
-  chatTime: {
-    fontSize: 12,
-    fontFamily: "Montserrat-Regular",
-    color: "gray",
-  },
+  chatDetails: { flex: 1 },
+  chatName: { fontSize: 18, fontFamily: "Montserrat-Bold", color: "#202121" },
+  chatMessage: { fontSize: 14, fontFamily: "Montserrat-Regular", color: "gray" },
+  chatMeta: { alignItems: "flex-end" },
+  chatTime: { fontSize: 12, fontFamily: "Montserrat-Regular", color: "gray" },
   fab: {
     position: "absolute",
     bottom: 20,
