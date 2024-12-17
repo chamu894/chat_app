@@ -4,11 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import entity.Chat;
 import entity.User;
-import entity.User_Status;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -16,98 +15,100 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import model.HibernateUtil;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 @WebServlet(name = "LoadHomeData", urlPatterns = {"/LoadHomeData"})
 public class LoadHomeData extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         Gson gson = new Gson();
 
+        JsonObject requestJson = gson.fromJson(request.getReader(), JsonObject.class);
+
         JsonObject responseJson = new JsonObject();
         responseJson.addProperty("status", false);
-        responseJson.addProperty("message", "Unable to prosses your account");
+        responseJson.addProperty("content", "Unable to prosses your account");
 
         try {
 
-            Session session = HibernateUtil.getSessionFactory().openSession();
+            if (requestJson != null) {
 
-            String userId = request.getParameter("id");
+                if (!requestJson.get("id").getAsString().isEmpty()) {
+                    Session session = HibernateUtil.getSessionFactory().openSession();
 
-            User user = (User) session.get(User.class, Integer.parseInt(userId));
+                    User user = (User) session.get(User.class, requestJson.get("id").getAsInt());
 
-            User_Status user_Status = (User_Status) session.get(User_Status.class, 1);
+                    if (user != null) {
 
-            user.setUser_status(user_Status);
-            session.update(user);
+                        List<User> userList = (List<User>) session.createCriteria(User.class)
+                                .add(Restrictions.ne("id", user.getId())).list();
 
-            Criteria criteria1 = session.createCriteria(User.class);
-            criteria1.add(Restrictions.ne("id", user.getId()));
+                        List<JsonObject> list = new ArrayList<>();
 
-            List<User> otherUserlist = criteria1.list();
+                        for (User contact : userList) {
 
-            for (User otherUser : otherUserlist) {
+                            List<Chat> chatList = (List<Chat>) session.createCriteria(Chat.class)
+                                    .add(Restrictions.or(
+                                            Restrictions.and(
+                                                    Restrictions.eq("from_user", user),
+                                                    Restrictions.eq("to_user", contact)
+                                            ),
+                                            Restrictions.and(
+                                                    Restrictions.eq("from_user", contact),
+                                                    Restrictions.eq("to_user", user)
+                                            )
+                                    )).addOrder(Order.desc("id")).list();
 
-                Criteria criteria2 = session.createCriteria(Chat.class);
-                criteria2.add(
-                        Restrictions.or(
-                                Restrictions.and(
-                                        Restrictions.eq("from_user", user),
-                                        Restrictions.eq("to_user", otherUser)
-                                ),
-                                Restrictions.and(
-                                        Restrictions.eq("from_user", otherUser),
-                                        Restrictions.eq("to_user", user)
-                                )
-                        )
-                );
-                criteria2.addOrder(Order.desc("id"));
-                criteria2.setMaxResults(1);
+                            JsonObject object = new JsonObject();
 
-                JsonObject chatItem = new JsonObject();
-                chatItem.addProperty("other_user_id", otherUser.getFrist_name() + "" + otherUser.getLast_name());
-                chatItem.addProperty("other_user_name", otherUser.getFrist_name() + "" + otherUser.getLast_name());
-                chatItem.addProperty("other_user_status", otherUser.getUser_status().getId());
-                
-                String serverPath = request.getServletContext().getRealPath("");
-                String otherUserAvaterImagePath = serverPath+File.separator+"AvatarImages"+File.separator+otherUser.getMobile()+".png";
+                            object.addProperty("toUser", contact.getId());
+                            object.addProperty("name", contact.getFrist_name() + " " + contact.getLast_name());
 
-                List<Chat> dbChatList = criteria2.list();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy, MMM dd hh:ss a");
+                            if (new File(request.getServletContext().getRealPath("") + File.separator + "AvatarImages" + File.separator + contact.getMobile() + ".png").exists()) {
+                                object.addProperty("image", true);
+                            } else {
+                                object.addProperty("image", false);
+                            }
 
-                if (dbChatList.isEmpty()) {
-                    chatItem.addProperty("message", "Let's start new conversation");
-                    chatItem.addProperty("dateTime", dateFormat.format(user.getRegistered_date_time()));
-                    chatItem.addProperty("chat_status_id", 1);
+                            JsonObject chatObject = new JsonObject();
 
-                } else {
+                            if (!chatList.isEmpty()) {
+                                Chat chat = chatList.get(0);
 
-                    chatItem.addProperty("message", dbChatList.get(0).getMessage());
+                                System.out.println(chat.getId());
 
-                    chatItem.addProperty("dateTime", dateFormat.format(dbChatList.get(0).getDate_time()));
+                                chatObject.addProperty("msg", chat.getMessage());
+                                chatObject.addProperty("fromUser", chat.getFrom_user().getId());
+                                chatObject.addProperty("time", new SimpleDateFormat("yyyy-mm-dd hh:mm a").format(chat.getDate_time()));
+                                chatObject.addProperty("status", chat.getChat_status().getId());
 
-                    chatItem.addProperty("chat_status_id", dbChatList.get(0).getChat_status().getId());
+                            }
+
+                            object.add("lastChat", gson.toJsonTree(chatObject));
+
+                            list.add(object);
+
+                        }
+
+                        responseJson.addProperty("status", true);
+                        responseJson.add("content", gson.toJsonTree(list));
+
+                    }
+
                 }
 
-                otherUser.setPassword(null);
             }
 
-            responseJson.addProperty("status", true);
-            responseJson.addProperty("message", "Sign In Success");
-            responseJson.addProperty("user", gson.toJson(user));
-            responseJson.addProperty("otherUserlist", gson.toJson(otherUserlist));
-
-            session.beginTransaction().commit();
-            session.close();
-
         } catch (Exception e) {
+            e.printStackTrace();
         }
+
+        response.setContentType("application/json");
+        response.getWriter().write(gson.toJson(responseJson));
 
     }
 

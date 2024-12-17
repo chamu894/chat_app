@@ -1,11 +1,21 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  TextInput,
+} from "react-native";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
-import { useState, useEffect } from "react";
+import { useState, useEffect,useCallback } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { router } from "expo-router";
+import { FlashList } from "@shopify/flash-list";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from "@react-navigation/native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -19,6 +29,11 @@ export default function Home() {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [getUser, setUser] = useState({});
+  const [getData, setData] = useEffect([]);
+
+  const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
   useEffect(() => {
     if (loaded || error) {
       SplashScreen.hideAsync();
@@ -28,6 +43,82 @@ export default function Home() {
   if (!loaded && !error) {
     return null;
   }
+
+  async function GetData() {
+
+    let response = await fetch(`${apiUrl}LoadHomeData`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: getUser.id,
+      }),
+    });
+
+    if (response.ok) {
+
+      let json = await response.json();
+
+      console.log(json);
+
+      if (json.status) {
+
+        setData(json.content);
+
+      } else {
+        console.log("Error 04");
+      }
+
+
+    } else {
+      console.log("Error 03");
+    }
+
+  }
+
+  useEffect(() => {
+
+    async function Cheng() {
+
+      let userObject = JSON.stringify(await AsyncStorage.getItem("user"));
+
+      setUser(userObject);
+
+      let response = await fetch(`${apiUrl}UserStatusCheng?id=1&st=2`);
+
+      if (response.ok) {
+
+        let json = await response.json();
+
+        console.log(json);
+
+        if (json.status) {
+          console.log("Cheng ok");
+        } else {
+          console.log("Error 2");
+        }
+
+      } else {
+        console.log("Error1")
+      }
+
+    }
+
+    Cheng();
+    GetData();
+
+  }, [getUser]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const intervalId = setInterval(() => {
+        GetData();
+      }, 5000);
+
+      return () => clearInterval(intervalId);
+    }, [getUser])
+  );
 
   return (
     <View style={styles.container}>
@@ -49,7 +140,11 @@ export default function Home() {
           style={styles.iconButton}
           onPress={() => setIsSearchActive((prev) => !prev)}
         >
-          <Ionicons name={isSearchActive ? "close" : "search"} size={24} color="white" />
+          <Ionicons
+            name={isSearchActive ? "close" : "search"}
+            size={24}
+            color="white"
+          />
         </Pressable>
         <Pressable
           style={styles.iconButton}
@@ -63,25 +158,26 @@ export default function Home() {
 
       {/* Chats List */}
       <ScrollView style={styles.chatList}>
-        {Array(10)
-          .fill(0)
-          .map((_, index) => (
-            <View style={styles.chatItem} key={index}>
-              <View style={styles.avatar}>
-                <FontAwesome name="user-circle" size={50} color="gray" />
-              </View>
-              <View style={styles.chatDetails}>
-                <Text style={styles.chatName}>Contact {index + 1}</Text>
-                <Text style={styles.chatMessage} numberOfLines={1}>
-                  Last message preview goes here...
-                </Text>
-              </View>
-              <View style={styles.chatMeta}>
-                <Text style={styles.chatTime}>10:00 AM</Text>
-                <Ionicons name="checkmark-done" size={16} color="green" />
-              </View>
-            </View>
-          ))}
+        <View style={styles.chatItem}>
+          <View style={styles.avatar}>
+            <FontAwesome name="user-circle" size={50} color="gray" />
+          </View>
+          <Pressable
+            style={styles.chatDetails}
+            onPress={async () => {
+              router.replace("/sendchat");
+            }}
+          >
+            <Text style={styles.chatName}>Contact </Text>
+            <Text style={styles.chatMessage} numberOfLines={1}>
+              Last message preview goes here...
+            </Text>
+          </Pressable>
+          <View style={styles.chatMeta}>
+            <Text style={styles.chatTime}>10:00 AM</Text>
+            <Ionicons name="checkmark-done" size={16} color="green" />
+          </View>
+        </View>
       </ScrollView>
 
       {/* Floating Action Button */}

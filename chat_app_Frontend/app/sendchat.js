@@ -8,6 +8,7 @@ import { FlashList } from "@shopify/flash-list";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 export default function sendchat() {
   const [getText, setText] = useState("");
@@ -30,7 +31,7 @@ export default function sendchat() {
           toUser: 2,
         }),
       });
-  
+
       if (response.ok) {
         let json = await response.json();
         if (json.status) {
@@ -78,6 +79,14 @@ export default function sendchat() {
   return (
     <SafeAreaView style={stylesheet.container}>
       <View style={stylesheet.header}>
+        <Pressable
+          style={stylesheet.backButton}
+          onPress={async () => {
+            router.replace("/home");
+          }}
+        >
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </Pressable>
         <View style={stylesheet.view6}>
           {/* <Image source={require("../assets/images/main.jpeg")} style={stylesheet.profileImage} /> */}
           <FontAwesome name="user-circle" size={40} color="black" />
@@ -179,6 +188,9 @@ const stylesheet = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 10,
     gap: 10,
+  },
+  backButton: {
+    marginRight: 10,
   },
   view6: {
     width: 50,

@@ -11,7 +11,12 @@ export default function ProfileUI() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable style={styles.backButton}>
+        <Pressable
+          style={styles.backButton}
+          onPress={async () => {
+            router.replace("/home");
+          }}
+        >
           <Ionicons name="arrow-back" size={24} color="white" />
         </Pressable>
         <Text style={styles.headerText}>Profile</Text>
