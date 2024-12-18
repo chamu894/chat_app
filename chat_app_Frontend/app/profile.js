@@ -27,7 +27,7 @@ export default function ProfileUI() {
         <View style={styles.profileImageContainer}>
           <FontAwesome name="user-circle" size={100} color="gray" />
         </View>
-        <Text style={styles.profileName}>Sahan</Text>
+        <Text style={styles.profileName}>Chamudith</Text>
         <Text style={styles.profileStatus}>Hey there! I am using ChatApp.</Text>
       </View>
 
